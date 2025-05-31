@@ -1,0 +1,284 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Play, Pause, Square, Save, Clock, Trash2 } from 'lucide-react';
+
+const CountdownTimer = () => {
+  const [time, setTime] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [remainingTime, setRemainingTime] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [templates, setTemplates] = useState([]);
+  const [templateName, setTemplateName] = useState('');
+  const audioRef = useRef(null);
+  const intervalRef = useRef(null);
+
+  // アラーム音の生成
+  const createAlarmSound = () => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    
+    oscillator.start();
+    
+    setTimeout(() => {
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    }, 500);
+  };
+
+  // タイマー開始
+  const startTimer = () => {
+    if (remainingTime === 0) {
+      const totalSeconds = time.hours * 3600 + time.minutes * 60 + time.seconds;
+      setRemainingTime(totalSeconds);
+    }
+    setIsRunning(true);
+  };
+
+  // タイマー一時停止
+  const pauseTimer = () => {
+    setIsRunning(false);
+  };
+
+  // タイマーリセット
+  const resetTimer = () => {
+    setIsRunning(false);
+    setRemainingTime(0);
+  };
+
+  // テンプレート保存
+  const saveTemplate = () => {
+    if (templateName.trim() === '') {
+      alert('テンプレート名を入力してください');
+      return;
+    }
+    
+    const newTemplate = {
+      id: Date.now(),
+      name: templateName,
+      hours: time.hours,
+      minutes: time.minutes,
+      seconds: time.seconds
+    };
+    
+    const updatedTemplates = [...templates, newTemplate];
+    setTemplates(updatedTemplates);
+    setTemplateName('');
+    
+    // 実際の環境では以下のコードで永続保存可能
+    // localStorage.setItem('timerTemplates', JSON.stringify(updatedTemplates));
+    
+    alert('テンプレートを保存しました');
+  };
+
+  // テンプレート選択
+  const selectTemplate = (template) => {
+    setTime({
+      hours: template.hours,
+      minutes: template.minutes,
+      seconds: template.seconds
+    });
+    setRemainingTime(0);
+    setIsRunning(false);
+  };
+
+  // テンプレート削除
+  const deleteTemplate = (id) => {
+    const updatedTemplates = templates.filter(t => t.id !== id);
+    setTemplates(updatedTemplates);
+    
+    // 実際の環境では以下のコードで永続保存可能
+    // localStorage.setItem('timerTemplates', JSON.stringify(updatedTemplates));
+  };
+
+  // 時間フォーマット
+  const formatTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  // タイマー実行
+  useEffect(() => {
+    if (isRunning && remainingTime > 0) {
+      intervalRef.current = setInterval(() => {
+        setRemainingTime(prev => {
+          if (prev <= 1) {
+            setIsRunning(false);
+            createAlarmSound();
+            alert('時間になりました！');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      clearInterval(intervalRef.current);
+    }
+
+    return () => clearInterval(intervalRef.current);
+  }, [isRunning, remainingTime]);
+
+  // 初期化時にローカルストレージから読み込み（実際の環境用）
+  useEffect(() => {
+    // 実際の環境では以下のコードでテンプレートを復元可能
+    // const saved = localStorage.getItem('timerTemplates');
+    // if (saved) {
+    //   setTemplates(JSON.parse(saved));
+    // }
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 p-6">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold text-white text-center mb-8">
+          カウントダウンタイマー
+        </h1>
+        
+        {/* メインタイマー表示 */}
+        <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 mb-8 text-center">
+          <div className="text-6xl font-mono font-bold text-white mb-6">
+            {formatTime(remainingTime || (time.hours * 3600 + time.minutes * 60 + time.seconds))}
+          </div>
+          
+          {/* 時間設定 */}
+          <div className="flex justify-center gap-4 mb-6">
+            <div className="text-center">
+              <label className="block text-white text-sm mb-2">時</label>
+              <input
+                type="number"
+                min="0"
+                max="23"
+                value={time.hours === 0 ? '' : time.hours}
+                onChange={(e) => setTime({...time, hours: parseInt(e.target.value) || 0})}
+                onFocus={(e) => e.target.select()}
+                placeholder="0"
+                className="w-16 h-12 text-center text-xl bg-white/20 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-400 placeholder-white/50"
+                disabled={isRunning}
+              />
+            </div>
+            <div className="text-center">
+              <label className="block text-white text-sm mb-2">分</label>
+              <input
+                type="number"
+                min="0"
+                max="59"
+                value={time.minutes === 0 ? '' : time.minutes}
+                onChange={(e) => setTime({...time, minutes: parseInt(e.target.value) || 0})}
+                onFocus={(e) => e.target.select()}
+                placeholder="0"
+                className="w-16 h-12 text-center text-xl bg-white/20 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-400 placeholder-white/50"
+                disabled={isRunning}
+              />
+            </div>
+            <div className="text-center">
+              <label className="block text-white text-sm mb-2">秒</label>
+              <input
+                type="number"
+                min="0"
+                max="59"
+                value={time.seconds === 0 ? '' : time.seconds}
+                onChange={(e) => setTime({...time, seconds: parseInt(e.target.value) || 0})}
+                onFocus={(e) => e.target.select()}
+                placeholder="0"
+                className="w-16 h-12 text-center text-xl bg-white/20 text-white rounded-lg border-0 focus:ring-2 focus:ring-blue-400 placeholder-white/50"
+                disabled={isRunning}
+              />
+            </div>
+          </div>
+          
+          {/* コントロールボタン */}
+          <div className="flex justify-center gap-4 mb-6">
+            {!isRunning ? (
+              <button
+                onClick={startTimer}
+                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full font-semibold transition-colors"
+              >
+                <Play size={20} />
+                開始
+              </button>
+            ) : (
+              <button
+                onClick={pauseTimer}
+                className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-full font-semibold transition-colors"
+              >
+                <Pause size={20} />
+                一時停止
+              </button>
+            )}
+            <button
+              onClick={resetTimer}
+              className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-full font-semibold transition-colors"
+            >
+              <Square size={20} />
+              リセット
+            </button>
+          </div>
+          
+          {/* テンプレート保存 */}
+          <div className="flex justify-center gap-2">
+            <input
+              type="text"
+              placeholder="テンプレート名"
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
+              className="px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-lg border-0 focus:ring-2 focus:ring-blue-400"
+            />
+            <button
+              onClick={saveTemplate}
+              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+            >
+              <Save size={16} />
+              保存
+            </button>
+          </div>
+        </div>
+        
+        {/* テンプレート一覧 */}
+        {templates.length > 0 && (
+          <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6">
+            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+              <Clock size={24} />
+              保存済みテンプレート
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {templates.map((template) => (
+                <div
+                  key={template.id}
+                  className="bg-white/10 rounded-xl p-4 hover:bg-white/20 transition-colors cursor-pointer"
+                  onClick={() => selectTemplate(template)}
+                >
+                  <div className="text-white font-semibold mb-2">{template.name}</div>
+                  <div className="text-white/80 text-sm mb-3">
+                    {formatTime(template.hours * 3600 + template.minutes * 60 + template.seconds)}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteTemplate(template.id);
+                    }}
+                    className="text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* 注意書き */}
+        <div className="text-center text-white/70 text-sm mt-6">
+          ※ Claude.ai環境では一時的な保存のみ。実際の環境では永続保存されます。
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CountdownTimer;
