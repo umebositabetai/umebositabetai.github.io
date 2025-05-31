@@ -1,0 +1,126 @@
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #1e3a8a, #4c1d95, #3730a3);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container {
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 30px;
+  border-radius: 24px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  text-align: center;
+}
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+.timer-display {
+  font-size: 3rem;
+  font-family: monospace;
+  margin-bottom: 20px;
+}
+.time-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.time-inputs div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+input[type="number"] {
+  width: 60px;
+  height: 40px;
+  text-align: center;
+  font-size: 1.2rem;
+  background-color: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  outline: none;
+}
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  color: white;
+  transition: background-color 0.3s;
+}
+#start {
+  background-color: #22c55e;
+}
+#start:hover {
+  background-color: #16a34a;
+}
+#pause {
+  background-color: #eab308;
+}
+#pause:hover {
+  background-color: #ca8a04;
+}
+#reset {
+  background-color: #ef4444;
+}
+#reset:hover {
+  background-color: #dc2626;
+}
+.template-save {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.template-save input {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background-color: rgba(255,255,255,0.2);
+  color: white;
+  outline: none;
+}
+#save-template {
+  background-color: #3b82f6;
+}
+#save-template:hover {
+  background-color: #2563eb;
+}
+.templates {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+  margin-bottom: 20px;
+}
+.templates div {
+  background-color: rgba(255,255,255,0.1);
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.templates div:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+.note {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.6);
+}
