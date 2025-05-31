@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>カウントダウンタイマー</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>カウントダウンタイマー</h1>
+    <div class="timer-display" id="timer-display">00:00:00</div>
+
+    <div class="time-inputs">
+      <div>
+        <label>時</label>
+        <input type="number" id="hours" min="0" max="23" placeholder="0" />
+      </div>
+      <div>
+        <label>分</label>
+        <input type="number" id="minutes" min="0" max="59" placeholder="0" />
+      </div>
+      <div>
+        <label>秒</label>
+        <input type="number" id="seconds" min="0" max="59" placeholder="0" />
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="start">開始</button>
+      <button id="pause">一時停止</button>
+      <button id="reset">リセット</button>
+    </div>
+
+    <div class="template-save">
+      <input type="text" id="template-name" placeholder="テンプレート名" />
+      <button id="save-template">保存</button>
+    </div>
+
+    <div id="templates" class="templates"></div>
+
+    <div class="note">※ ローカルストレージ未使用。リロードでデータは消えます。</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
